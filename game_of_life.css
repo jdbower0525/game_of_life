@@ -1,0 +1,12 @@
+table, tr, td{
+    border: 1px solid black;
+}
+
+tr, td{
+    width: 15px;
+    height: 15px;
+}
+
+.livecell{
+    background-color: black;
+}
