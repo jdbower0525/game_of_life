@@ -10,3 +10,7 @@ tr, td{
 .livecell{
     background-color: black;
 }
+
+.deadcell{
+    background-color: white;
+}
