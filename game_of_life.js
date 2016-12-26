@@ -1,100 +1,65 @@
-var rows = 30
-var cols = 30
-var arena = createTable();
+function insertLife(){
+    $(this).addClass("alive")
+}
 
-function createTable(){
-    var $table = $("<table>")
-    $("#gameboard").empty()
-    $("#gameboard").append($table)
-    for(var row = 0; row < rows; row++){
-        var $row = $("<tr>")
-        $table.append($row)
-        for(var col = 0; col < cols; col++){
-            var $col = $("<td>")
-            $col.click(clickCell)
-            $row.append($col)
-            $col.attr("id", row + "_" + col)
-        }
+function toggleTime(){
+    if(!clock){
+        clock = setInterval(lifeDeath, 500)
+    }
+    else{
+        clearInterval(clock)
+        clock = 0
     }
 }
-function clickCell(){
-    $(this).toggleClass("livecell")
-    findNeighbors($(this))
-    tick(count)
-}
-function findNeighbors(cell){
-    count = 0
-    console.log(cell.attr("id").split("_"))
+
+function examineSurroundings(cell){
+    if (!cell.attr("id")){
+        return 0
+    }
     var x = parseInt(cell.attr("id").split("_")[0])
     var y = parseInt(cell.attr("id").split("_")[1])
-    var neighbors = [$("#" + (x-1) + "_" + (y-1)),
-                     $("#" +  x    + "_" + (y-1)),
-                     $("#" + (x+1) + "_" + (y-1)),
-                     $("#" + (x-1) + "_" +  y),
-                     $("#" + (x+1) + "_" +  y),
-                     $("#" + (x-1) + "_" + (y+1)),
-                     $("#" +  x    + "_" + (y+1)),
-                     $("#" + (x+1) + "_" + (y+1))
-                 ]
-    for(var i = 0; i < neighbors.length; i++) {
-        if (neighbors[i].hasClass("livecell")){
+    var count = 0
+    var surroundings = [$("#" + (x - 1) + "_" + (y - 1)),
+                        $("#" + (x + 1) + "_" + (y + 1)),
+                        $("#" + (x + 1) + "_" + (y - 1)),
+                        $("#" + (x - 1) + "_" + (y + 1)),
+                        $("#" + (x - 1) + "_" + y),
+                        $("#" + x + "_" + (y - 1)),
+                        $("#" + (x + 1) + "_" + y),
+                        $("#" + x + "_" + (y + 1)),
+                        ]
+    for(var i = 0; i < surroundings.length; i++){
+        if (surroundings[i].hasClass("alive")){
             count++
         }
     }
+    return count
 }
-function updateCellState(x, y, new_table) {
-	var cell_state = table[y][x];
-	var count = 0;
-    var x = parseInt(cell.attr("id").split("_")[0])
-    var y = parseInt(cell.attr("id").split("_")[1])
-    var neighbors = [$("#" + (x-1) + "_" + (y-1)),
-                     $("#" +  x    + "_" + (y-1)),
-                     $("#" + (x+1) + "_" + (y-1)),
-                     $("#" + (x-1) + "_" +  y),
-                     $("#" + (x+1) + "_" +  y),
-                     $("#" + (x-1) + "_" + (y+1)),
-                     $("#" +  x    + "_" + (y+1)),
-                     $("#" + (x+1) + "_" + (y+1))
-                 ]
-    for(var i = 0; i < neighbors.length; i++) {
-        if (neighbors[i].hasClass("livecell")){
-            count++
+
+function lifeDeath(){
+    var current_table = $("#planet")
+    var parallel_rows = 30
+    var parallel_col = 30
+    var $parallel_table = $("<table>")
+    for(var parallel_row = 0; parallel_row < parallel_rows; parallel_row++){
+        var $parallel_row = $("<tr>")
+        $parallel_table.append($parallel_row)
+        for(var parallel_cell = 0; parallel_cell < parallel_col; parallel_cell++) {
+            var $parallel_cell = $("<td>")
+            $parallel_row.append($parallel_cell)
+            $parallel_cell.attr("id", parallel_row + "_" + parallel_cell)
+            var live_neighbors = examineSurroundings($('#'+parallel_row + "_" + parallel_cell))
+            $parallel_cell.click(insertLife)
+            if (live_neighbors == 3 ||(live_neighbors == 2 && $('#'+parallel_row + "_" + parallel_cell).hasClass("alive"))){
+                $parallel_cell.addClass("alive")
+            }
         }
     }
-    if (cell_state) {
-        if (living_neighbors < 2) {
-            new_table[y][x] = false;
-        } else if (living_neighbors > 3) {
-            new_table[y][x] = false;
-        } else {
-            new_table[y][x] = true;
-        }
-    } else {
-        if (living_neighbors == 3) {
-            new_table[y][x] = true;
-        } else {
-            new_table[y][x] = false;
-        }
-    }
+    $("#world").empty()
+    $("#world").append($parallel_table)
 }
 
 
-// function tick(count){
-//     console.log(count)
-//     for(var x = 0; x < rows; x++){
-//         for(var y = 0; y < cols; y++){
-// if(count === 0){
-//     $(this).hasClass("deadcell")
-// }
-// if(count === 2){
-// }
-// if(count === 3){
-//     $(this).hasClass("livecell")
-// }
-//         }
-//     }
-// }
-
-$("#cols")
-$("#makeTable").click(createTable)
-$("#startButton").click(tick(findNeighbors(count)))
+var clock = false
+$("#drawButton").click(lifeDeath)
+$("#timeButton").click(toggleTime)
